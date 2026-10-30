@@ -1,6 +1,19 @@
-import React, { useState } from 'react';
+import { Button } from '@/components/ui/Button';
 import {
-  Image,
+  ChevronLeftIcon,
+  LockIcon,
+  MailIcon,
+  UserIcon,
+} from '@/components/ui/Icons';
+import { Input } from '@/components/ui/Input';
+import { Text } from '@/components/ui/Text';
+import { useTheme } from '@/hooks/use-theme';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
+import {
+  Dimensions,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -9,17 +22,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@/hooks/use-theme';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Text } from '@/components/ui/Text';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const { colors, spacing, borderRadius } = useTheme();
+  const { colors, spacing } = useTheme();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -95,196 +104,230 @@ export default function SignUpScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={styles.rootContainer}>
+      <StatusBar style="light" />
+
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingHorizontal: spacing.lg,
-              paddingVertical: spacing.xl,
-            },
-          ]}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          bounces={false}
           showsVerticalScrollIndicator={false}
         >
-          {/* Branding Section */}
-          <View style={styles.brandContainer}>
-            <Image
-              source={require('@/assets/images/brand-icon.png')}
-              style={styles.brandIcon}
-              resizeMode="contain"
-            />
-            <Text size="xl" weight="bold" color={colors.primary} style={styles.appName}>
-              Huddle
-            </Text>
-            <Text size="xl" weight="bold" style={styles.heading}>
-              Create your account
-            </Text>
-            <Text size="sm" color={colors.textSecondary} style={styles.subheading}>
-              Join Huddle to message and collaborate with teams and nearby peers
-            </Text>
-          </View>
+          <ImageBackground
+            source={require('@/assets/images/signup-header-landscape.png')}
+            style={styles.headerBackground}
+            resizeMode="cover"
+          >
+            <SafeAreaView edges={['top', 'left', 'right']} style={styles.headerSafeArea}>
+              <View style={styles.headerContent}>
+                <Pressable
+                  onPress={handleNavigateToLogin}
+                  accessibilityRole="button"
+                  accessibilityLabel="Back to Sign In"
+                  style={styles.backButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <ChevronLeftIcon size={18} color="#FFFFFF" />
+                </Pressable>
 
-          {/* Success Banner */}
-          {successMessage ? (
-            <View
-              style={[
-                styles.successBanner,
-                {
-                  backgroundColor: colors.outgoingMessage,
-                  borderColor: colors.green,
-                  borderRadius: borderRadius.md,
-                  marginBottom: spacing.md,
-                },
-              ]}
-            >
-              <Text size="sm" color={colors.primary} weight="medium" align="center">
-                {successMessage}
-              </Text>
+                <View style={styles.titleWrapper}>
+                  <Text size="xxl" weight="bold" color="#FFFFFF" style={styles.headerTitle}>
+                    Create your account
+                  </Text>
+                  <Text size="sm" color="#B5C4CC" style={styles.headerSubtitle}>
+                    Join Huddle and start messaging offline.
+                  </Text>
+                </View>
+              </View>
+            </SafeAreaView>
+          </ImageBackground>
+
+          <View style={[styles.formSheet, { backgroundColor: colors.surface }]}>
+            {successMessage ? (
+              <View
+                style={[
+                  styles.successBanner,
+                  {
+                    backgroundColor: colors.outgoingMessage,
+                    borderColor: colors.green,
+                    borderRadius: 12,
+                    marginBottom: spacing.md,
+                  },
+                ]}
+              >
+                <Text size="sm" color={colors.primary} weight="medium" align="center">
+                  {successMessage}
+                </Text>
+              </View>
+            ) : null}
+
+            <View style={[styles.inputsContainer, { gap: spacing.md }]}>
+              <Input
+                label="Full name"
+                placeholder="Enter your full name"
+                value={name}
+                onChangeText={(text) => {
+                  setName(text);
+                  if (nameError) setNameError('');
+                  if (successMessage) setSuccessMessage(null);
+                }}
+                error={nameError}
+                leftIcon={<UserIcon size={18} color={colors.textSecondary} />}
+                autoCapitalize="words"
+                autoComplete="name"
+                autoCorrect={false}
+              />
+
+              <Input
+                label="Email"
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (emailError) setEmailError('');
+                  if (successMessage) setSuccessMessage(null);
+                }}
+                error={emailError}
+                leftIcon={<MailIcon size={18} color={colors.textSecondary} />}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
+              />
+
+              <Input
+                label="Password"
+                placeholder="Create a password"
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError('');
+                  if (confirmPasswordError && confirmPassword === text) {
+                    setConfirmPasswordError('');
+                  }
+                  if (successMessage) setSuccessMessage(null);
+                }}
+                error={passwordError}
+                hint={!passwordError ? 'Must be at least 8 characters' : undefined}
+                leftIcon={<LockIcon size={18} color={colors.textSecondary} />}
+                secureTextEntry
+                showPasswordToggle
+              />
+
+              <Input
+                label="Confirm password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChangeText={(text) => {
+                  setConfirmPassword(text);
+                  if (confirmPasswordError) setConfirmPasswordError('');
+                  if (successMessage) setSuccessMessage(null);
+                }}
+                error={confirmPasswordError}
+                leftIcon={<LockIcon size={18} color={colors.textSecondary} />}
+                secureTextEntry
+                showPasswordToggle
+              />
+
+              <Button
+                label="Create Account"
+                variant="primary"
+                size="lg"
+                fullWidth
+                onPress={handleSignUp}
+                loading={isLoading}
+                style={{ marginTop: spacing.xs }}
+              />
             </View>
-          ) : null}
 
-          {/* Form Fields */}
-          <View style={[styles.formContainer, { gap: spacing.md }]}>
-            <Input
-              label="Full Name"
-              placeholder="Alex Morgan"
-              value={name}
-              onChangeText={(text) => {
-                setName(text);
-                if (nameError) setNameError('');
-                if (successMessage) setSuccessMessage(null);
-              }}
-              error={nameError}
-              autoCapitalize="words"
-              autoComplete="name"
-              autoCorrect={false}
-            />
-
-            <Input
-              label="Email"
-              placeholder="name@example.com"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                if (emailError) setEmailError('');
-                if (successMessage) setSuccessMessage(null);
-              }}
-              error={emailError}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect={false}
-            />
-
-            <Input
-              label="Password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                if (passwordError) setPasswordError('');
-                if (confirmPasswordError && confirmPassword === text) {
-                  setConfirmPasswordError('');
-                }
-                if (successMessage) setSuccessMessage(null);
-              }}
-              error={passwordError}
-              hint={!passwordError ? 'Must be at least 8 characters' : undefined}
-              secureTextEntry
-              showPasswordToggle
-            />
-
-            <Input
-              label="Confirm Password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChangeText={(text) => {
-                setConfirmPassword(text);
-                if (confirmPasswordError) setConfirmPasswordError('');
-                if (successMessage) setSuccessMessage(null);
-              }}
-              error={confirmPasswordError}
-              secureTextEntry
-              showPasswordToggle
-            />
-
-            <Button
-              label="Create Account"
-              variant="primary"
-              size="lg"
-              fullWidth
-              onPress={handleSignUp}
-              loading={isLoading}
-              style={{ marginTop: spacing.xs }}
-            />
-          </View>
-
-          {/* Footer Navigation Link */}
-          <View style={[styles.footerRow, { marginTop: spacing.lg }]}>
-            <Text size="sm" color={colors.textSecondary}>
-              Already have an account?{' '}
-            </Text>
-            <Pressable
-              onPress={handleNavigateToLogin}
-              accessibilityRole="link"
-              accessibilityLabel="Navigate to Log In"
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text size="sm" weight="semiBold" color={colors.primary}>
-                Log In
+            <View style={[styles.footerRow, { marginTop: spacing.xl }]}>
+              <Text size="sm" color={colors.textSecondary}>
+                Already have an account?{' '}
               </Text>
-            </Pressable>
+              <Pressable
+                onPress={handleNavigateToLogin}
+                accessibilityRole="link"
+                accessibilityLabel="Navigate to Sign In"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text size="sm" weight="semiBold" color={colors.blue}>
+                  Sign In
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  rootContainer: {
     flex: 1,
+    backgroundColor: '#102A38',
   },
   keyboardView: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
   },
-  brandContainer: {
+  headerBackground: {
+    width: SCREEN_WIDTH,
+    height: 220,
+    backgroundColor: '#102A38',
+    justifyContent: 'space-between',
+  },
+  headerSafeArea: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'center',
+    marginBottom: 12,
   },
-  brandIcon: {
-    width: 64,
-    height: 64,
-    marginBottom: 8,
+  titleWrapper: {
+    paddingLeft: 4,
   },
-  appName: {
-    letterSpacing: 0.5,
-    marginBottom: 2,
+  headerTitle: {
+    letterSpacing: 0.3,
+    marginBottom: 4,
   },
-  heading: {
-    marginTop: 4,
-    textAlign: 'center',
+  headerSubtitle: {
+    letterSpacing: 0.2,
   },
-  subheading: {
-    marginTop: 6,
-    textAlign: 'center',
-    maxWidth: 290,
+  formSheet: {
+    flex: 1,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 36,
+    marginTop: -24,
   },
   successBanner: {
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderWidth: 1,
   },
-  formContainer: {
+  inputsContainer: {
     width: '100%',
   },
   footerRow: {
@@ -293,4 +336,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-

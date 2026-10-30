@@ -1,7 +1,19 @@
-import React, { useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import {
+  ChevronLeftIcon,
+  LockIcon,
+  MailIcon
+} from '@/components/ui/Icons';
+import { Input } from '@/components/ui/Input';
+import { Text } from '@/components/ui/Text';
+import { useTheme } from '@/hooks/use-theme';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 import {
   Alert,
-  Image,
+  Dimensions,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,17 +22,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@/hooks/use-theme';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Text } from '@/components/ui/Text';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { colors, spacing, borderRadius } = useTheme();
+  const { colors, spacing } = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,7 +61,7 @@ export default function LoginScreen() {
     return isValid;
   };
 
-  const handleLogin = () => {
+  const handleSignIn = () => {
     if (!validate()) return;
 
     setIsLoading(true);
@@ -74,191 +82,219 @@ export default function LoginScreen() {
     router.push('/(auth)/sign-up');
   };
 
+  const handleGoBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  };
+
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={styles.rootContainer}>
+      <StatusBar style="light" />
+
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingHorizontal: spacing.lg,
-              paddingVertical: spacing.xl,
-            },
-          ]}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          bounces={false}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header Branding */}
-          <View style={styles.brandContainer}>
-            <Image
-              source={require('@/assets/images/brand-icon.png')}
-              style={styles.brandIcon}
-              resizeMode="contain"
-            />
-            <Text size="xxl" weight="bold" color={colors.primary} style={styles.appName}>
-              Huddle
-            </Text>
-            <Text size="xl" weight="bold" style={styles.heading}>
-              Welcome back
-            </Text>
-            <Text size="sm" color={colors.textSecondary} style={styles.subheading}>
-              Sign in to continue connecting with your team and groups
-            </Text>
-          </View>
 
-          {/* Form Status Message */}
-          {statusMessage ? (
-            <View
-              style={[
-                styles.statusBanner,
-                {
-                  backgroundColor: colors.outgoingMessage,
-                  borderColor: colors.green,
-                  borderRadius: borderRadius.md,
-                  marginBottom: spacing.md,
-                },
-              ]}
-            >
-              <Text size="sm" color={colors.primary} weight="medium" align="center">
-                {statusMessage}
-              </Text>
-            </View>
-          ) : null}
+          <ImageBackground
+            source={require('@/assets/images/login-header-landscape.png')}
+            style={styles.headerBackground}
+            resizeMode="cover"
+          >
+            <SafeAreaView edges={['top', 'left', 'right']} style={styles.headerSafeArea}>
+              <View style={styles.headerContent}>
+                <Pressable
+                  onPress={handleGoBack}
+                  accessibilityRole="button"
+                  accessibilityLabel="Go back"
+                  style={styles.backButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <ChevronLeftIcon size={18} color="#FFFFFF" />
+                </Pressable>
 
-          {/* Form Fields */}
-          <View style={[styles.formContainer, { gap: spacing.md }]}>
-            <Input
-              label="Email"
-              placeholder="name@example.com"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                if (emailError) setEmailError('');
-                if (statusMessage) setStatusMessage(null);
-              }}
-              error={emailError}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect={false}
-            />
+                <View style={styles.titleWrapper}>
+                  <Text size="xxl" weight="bold" color="#FFFFFF" style={styles.headerTitle}>
+                    Welcome back
+                  </Text>
+                  <Text size="sm" color="#B5C4CC" style={styles.headerSubtitle}>
+                    Sign in to continue to Huddle
+                  </Text>
+                </View>
+              </View>
+            </SafeAreaView>
+          </ImageBackground>
 
-            <View>
+          <View style={[styles.formSheet, { backgroundColor: colors.surface }]}>
+
+            {statusMessage ? (
+              <View
+                style={[
+                  styles.statusBanner,
+                  {
+                    backgroundColor: colors.outgoingMessage,
+                    borderColor: colors.green,
+                    borderRadius: 12,
+                    marginBottom: spacing.md,
+                  },
+                ]}
+              >
+                <Text size="sm" color={colors.primary} weight="medium" align="center">
+                  {statusMessage}
+                </Text>
+              </View>
+            ) : null}
+
+
+            <View style={[styles.inputsContainer, { gap: spacing.md }]}>
               <Input
-                label="Password"
-                placeholder="Enter your password"
-                value={password}
+                label="Email"
+                placeholder="Enter your email"
+                value={email}
                 onChangeText={(text) => {
-                  setPassword(text);
-                  if (passwordError) setPasswordError('');
+                  setEmail(text);
+                  if (emailError) setEmailError('');
                   if (statusMessage) setStatusMessage(null);
                 }}
-                error={passwordError}
-                secureTextEntry
-                showPasswordToggle
+                error={emailError}
+                leftIcon={<MailIcon size={18} color={colors.textSecondary} />}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
               />
 
+              <View>
+                <Input
+                  label="Password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (passwordError) setPasswordError('');
+                    if (statusMessage) setStatusMessage(null);
+                  }}
+                  error={passwordError}
+                  leftIcon={<LockIcon size={18} color={colors.textSecondary} />}
+                  secureTextEntry
+                  showPasswordToggle
+                />
+
+                <Pressable
+                  onPress={handleForgotPassword}
+                  accessibilityRole="button"
+                  accessibilityLabel="Forgot password"
+                  style={[styles.forgotPasswordButton, { marginTop: spacing.xs }]}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text size="xs" weight="medium" color={colors.blue}>
+                    Forgot password?
+                  </Text>
+                </Pressable>
+              </View>
+
+              <Button
+                label="Sign In"
+                variant="primary"
+                size="lg"
+                fullWidth
+                onPress={handleSignIn}
+                loading={isLoading}
+                style={{ marginTop: spacing.xs }}
+              />
+            </View>
+
+            <View style={[styles.footerRow, { marginTop: spacing.xl }]}>
+              <Text size="sm" color={colors.textSecondary}>
+                Don't have an account?{' '}
+              </Text>
               <Pressable
-                onPress={handleForgotPassword}
-                accessibilityRole="button"
-                accessibilityLabel="Forgot password"
-                style={[styles.forgotPasswordButton, { marginTop: spacing.xs }]}
+                onPress={handleNavigateToSignUp}
+                accessibilityRole="link"
+                accessibilityLabel="Navigate to Sign Up"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Text size="xs" weight="medium" color={colors.blue}>
-                  Forgot password?
+                <Text size="sm" weight="semiBold" color={colors.blue}>
+                  Sign Up
                 </Text>
               </Pressable>
             </View>
-
-            <Button
-              label="Log In"
-              variant="primary"
-              size="lg"
-              fullWidth
-              onPress={handleLogin}
-              loading={isLoading}
-              style={{ marginTop: spacing.xs }}
-            />
-          </View>
-
-          {/* Separator */}
-          <View style={[styles.separatorContainer, { marginVertical: spacing.lg }]}>
-            <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
-            <Text
-              size="xs"
-              color={colors.textSecondary}
-              style={[styles.separatorText, { paddingHorizontal: spacing.sm }]}
-            >
-              or
-            </Text>
-            <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
-          </View>
-
-          {/* Sign Up Link */}
-          <View style={styles.footerRow}>
-            <Text size="sm" color={colors.textSecondary}>
-              Don't have an account?{' '}
-            </Text>
-            <Pressable
-              onPress={handleNavigateToSignUp}
-              accessibilityRole="link"
-              accessibilityLabel="Navigate to Sign Up"
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text size="sm" weight="semiBold" color={colors.primary}>
-                Sign Up
-              </Text>
-            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  rootContainer: {
     flex: 1,
+    backgroundColor: '#102A38',
   },
   keyboardView: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
   },
-  brandContainer: {
+  headerBackground: {
+    width: SCREEN_WIDTH,
+    height: 250,
+    backgroundColor: '#102A38',
+    justifyContent: 'space-between',
+  },
+  headerSafeArea: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
-    marginBottom: 28,
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  brandIcon: {
-    width: 68,
-    height: 68,
-    marginBottom: 10,
+  titleWrapper: {
+    paddingLeft: 4,
   },
-  appName: {
-    letterSpacing: 0.5,
-    marginBottom: 4,
+  headerTitle: {
+    letterSpacing: 0.3,
+    marginBottom: 6,
   },
-  heading: {
-    marginTop: 6,
-    textAlign: 'center',
+  headerSubtitle: {
+    letterSpacing: 0.2,
   },
-  subheading: {
-    marginTop: 6,
-    textAlign: 'center',
-    maxWidth: 280,
+  formSheet: {
+    flex: 1,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 36,
+    marginTop: -24,
   },
   statusBanner: {
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderWidth: 1,
   },
-  formContainer: {
+  inputsContainer: {
     width: '100%',
   },
   forgotPasswordButton: {
@@ -273,7 +309,7 @@ const styles = StyleSheet.create({
     height: 1,
   },
   separatorText: {
-    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   footerRow: {
     flexDirection: 'row',
@@ -281,4 +317,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-

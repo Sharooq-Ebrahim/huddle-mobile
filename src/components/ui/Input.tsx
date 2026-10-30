@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks/use-theme';
 import React, { useState } from 'react';
 import {
   Pressable,
@@ -10,7 +11,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
-import { useTheme } from '@/hooks/use-theme';
+import { EyeIcon, EyeOffIcon } from './Icons';
 
 export interface InputProps extends TextInputProps {
   label?: string;
@@ -130,15 +131,11 @@ export function Input({
             style={[styles.iconContainer, { marginLeft: spacing.sm }]}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text
-              style={{
-                color: colors.primary,
-                fontSize: typography.size.xs,
-                fontWeight: typography.weight.medium,
-              }}
-            >
-              {isPasswordHidden ? 'Show' : 'Hide'}
-            </Text>
+            {isPasswordHidden ? (
+              <EyeOffIcon size={20} color={colors.textSecondary} />
+            ) : (
+              <EyeIcon size={20} color={colors.textSecondary} />
+            )}
           </Pressable>
         ) : rightIcon ? (
           <View style={[styles.iconContainer, { marginLeft: spacing.sm }]}>{rightIcon}</View>
