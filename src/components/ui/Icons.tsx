@@ -247,6 +247,23 @@ export function ChevronLeftIcon({ size = 16, color = '#FFFFFF' }: IconProps) {
     </View>
   );
 }
+export function CheckIcon({ size = 18, color = '#20A477' }: IconProps) {
+  const borderWidth = Math.max(2, Math.round(size * 0.12));
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          width: size * 0.5,
+          height: size * 0.28,
+          borderColor: color,
+          borderBottomWidth: borderWidth,
+          borderLeftWidth: borderWidth,
+          transform: [{ rotate: '-45deg' }, { translateY: -size * 0.1 }],
+        }}
+      />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   iconBox: {

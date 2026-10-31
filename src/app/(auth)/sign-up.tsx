@@ -89,9 +89,16 @@ export default function SignUpScreen() {
     if (!validate()) return;
 
     setIsLoading(true);
+    // Simulate signup & OTP dispatch API call
     setTimeout(() => {
       setIsLoading(false);
-      setSuccessMessage('Account details validated! Ready for future authentication integration.');
+      router.push({
+        pathname: '/(auth)/verify-otp',
+        params: {
+          email: email.trim(),
+          name: name.trim(),
+        },
+      });
     }, 450);
   };
 
@@ -109,7 +116,7 @@ export default function SignUpScreen() {
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           style={styles.scrollView}

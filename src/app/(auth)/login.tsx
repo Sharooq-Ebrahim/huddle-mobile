@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button';
 import {
-  ChevronLeftIcon,
   LockIcon,
   MailIcon
 } from '@/components/ui/Icons';
@@ -94,7 +93,7 @@ export default function LoginScreen() {
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           style={styles.scrollView}
@@ -111,16 +110,6 @@ export default function LoginScreen() {
           >
             <SafeAreaView edges={['top', 'left', 'right']} style={styles.headerSafeArea}>
               <View style={styles.headerContent}>
-                <Pressable
-                  onPress={handleGoBack}
-                  accessibilityRole="button"
-                  accessibilityLabel="Go back"
-                  style={styles.backButton}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <ChevronLeftIcon size={18} color="#FFFFFF" />
-                </Pressable>
-
                 <View style={styles.titleWrapper}>
                   <Text size="xxl" weight="bold" color="#FFFFFF" style={styles.headerTitle}>
                     Welcome back
@@ -272,6 +261,7 @@ const styles = StyleSheet.create({
   },
   titleWrapper: {
     paddingLeft: 4,
+    paddingTop: 14,
   },
   headerTitle: {
     letterSpacing: 0.3,
