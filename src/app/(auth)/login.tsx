@@ -66,7 +66,7 @@ export default function LoginScreen() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      setStatusMessage('Validation passed. Ready for backend authentication integration.');
+      router.replace('/chats');
     }, 400);
   };
 

@@ -151,7 +151,7 @@ export default function VerifyOtpScreen() {
 
       setIsSuccess(true);
       setTimeout(() => {
-        router.replace('/(main)');
+        router.replace('/chats');
       }, 700);
     }, 650);
   };
